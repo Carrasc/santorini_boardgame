@@ -80,7 +80,10 @@ public class BoardManager : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        
+
+        // de-select the builder if any was left from previous rounds
+        SelectBuilder(currentSelectedBuilder, null, false);
+
     }
 
     public void SetSelectedPosition(GameObject square, int row, int column)
@@ -209,6 +212,9 @@ public class BoardManager : MonoBehaviour
                     case PositionState.BLOCKED:                     
                         break;
                 }
+
+                // de-select the builder
+                SelectBuilder(currentSelectedBuilder, null, false);
 
                 GameMaster.Instance.NextAction();
             }
@@ -355,9 +361,7 @@ public class BoardManager : MonoBehaviour
 
         // Update the builder position in the game logic
         currentSelectedBuilder.positionInBoard = new Vector2(positionToMove.x, positionToMove.y);
-
-        // de-select the builder
-        SelectBuilder(currentSelectedBuilder, null, false);
+       
         GameMaster.Instance.NextAction();
 
         // If the player moved to a Lvl3 structure, end the game and dont show possible building squares
@@ -367,8 +371,8 @@ public class BoardManager : MonoBehaviour
             return;
         }
 
-        // Show possible square positions for building
-        ShowAvailableBoardPositions(GameMaster.Instance.playerBuilders[GameMaster.Instance.turnState.playerTurn][0].positionInBoard, ref availablePositions, false);
-        ShowAvailableBoardPositions(GameMaster.Instance.playerBuilders[GameMaster.Instance.turnState.playerTurn][1].positionInBoard, ref availablePositions, false);
+        // Show possible square positions for building (from the builder that moved that round only)
+        ShowAvailableBoardPositions(currentSelectedBuilder.positionInBoard, ref availablePositions, false);
+        //ShowAvailableBoardPositions(GameMaster.Instance.playerBuilders[GameMaster.Instance.turnState.playerTurn][1].positionInBoard, ref availablePositions, false);
     }
 }
