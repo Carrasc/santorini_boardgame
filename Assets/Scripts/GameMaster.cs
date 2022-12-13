@@ -122,6 +122,16 @@ public class GameMaster : MonoBehaviour
         //StartCoroutine(ShowText());
         turnState.playerTurn = (turnState.playerTurn + 1)%2;
 
+        if (turnState.action == TurnAction.MOVE)
+        {
+            if (CheckForGameOver())
+            {
+                // If player 1 cant move, player 2 wins and vice versa
+                WonGame((turnState.playerTurn + 1) % 2);
+            }
+        }
+        
+
         if (turnState.playerTurn == 0)
         {
             foreach (Builder builder in playerBuilders[0])
@@ -185,6 +195,22 @@ public class GameMaster : MonoBehaviour
             turnState.action = TurnAction.MOVE;
             NextPlayer();
         }
+    }
+
+    public bool CheckForGameOver()
+    {
+        List<Vector2> availablePositions = new List<Vector2>();
+
+        // Check if either of the builder can move
+        foreach (Builder builder in playerBuilders[turnState.playerTurn])
+        {
+            BoardManager.Instance.ShowAvailableBoardPositions(builder.positionInBoard, ref availablePositions, true);
+        }
+
+        if (availablePositions.Count == 0)
+            return true;
+
+        return false;
     }
 
     public void WonGame(int player)

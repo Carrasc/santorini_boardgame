@@ -160,7 +160,7 @@ public class BoardManager : MonoBehaviour
                 if (GameMaster.Instance.playerBuilders[playerTurn][i].positionInBoard.x == row && GameMaster.Instance.playerBuilders[playerTurn][i].positionInBoard.y == column && currentSelectedBuilder == null)
                 {                   
                     SelectBuilder(GameMaster.Instance.playerBuilders[playerTurn][i], square, true);
-                    ShowAvailableBoardPositions(new Vector2(row, column), ref availablePositions);
+                    ShowAvailableBoardPositions(new Vector2(row, column), ref availablePositions, false);
                     // Play the selected animation
                     currentSelectedBuilder.builderGameObject.GetComponent<BuilderSelectedAnimation>().enabled = true;
                     break;
@@ -224,7 +224,7 @@ public class BoardManager : MonoBehaviour
         //builder.builderGameObject.GetComponent<BuilderSelectedAnimation>().enabled = state;
     }
 
-    private List<Vector2> ShowAvailableBoardPositions(Vector2 builderPos, ref List<Vector2> availablePositions)
+    public List<Vector2> ShowAvailableBoardPositions(Vector2 builderPos, ref List<Vector2> availablePositions, bool gameOverCheck)
     {
         int from_i = 0;
         int from_j = 0;
@@ -293,17 +293,22 @@ public class BoardManager : MonoBehaviour
                 {
                     availablePositions.Add(vectorToAdd);
 
-                    // Different indicator depending if moving or building
-                    if (GameMaster.Instance.turnState.action == TurnAction.MOVE)
-                        boardState[i][j].squareGameObject.transform.GetChild(0).gameObject.SetActive(true);
-                    else if (GameMaster.Instance.turnState.action == TurnAction.BUILD)
-                        boardState[i][j].squareGameObject.transform.GetChild(1).gameObject.SetActive(true);
+                    // A check done at the start of each round, to see if the game is over or not (the player cant move anymore)
+                    if (!gameOverCheck)
+                    {
+                        // Different indicator depending if moving or building
+                        if (GameMaster.Instance.turnState.action == TurnAction.MOVE)
+                            boardState[i][j].squareGameObject.transform.GetChild(0).gameObject.SetActive(true);
+                        else if (GameMaster.Instance.turnState.action == TurnAction.BUILD)
+                            boardState[i][j].squareGameObject.transform.GetChild(1).gameObject.SetActive(true);
+                    }
                 } 
             }
         }
 
         return availablePositions;
     }
+
 
     private void HideAvailableBoardPositions(ref List<Vector2> availablePositions)
     {
@@ -363,7 +368,7 @@ public class BoardManager : MonoBehaviour
         }
 
         // Show possible square positions for building
-        ShowAvailableBoardPositions(GameMaster.Instance.playerBuilders[GameMaster.Instance.turnState.playerTurn][0].positionInBoard, ref availablePositions);
-        ShowAvailableBoardPositions(GameMaster.Instance.playerBuilders[GameMaster.Instance.turnState.playerTurn][1].positionInBoard, ref availablePositions);
+        ShowAvailableBoardPositions(GameMaster.Instance.playerBuilders[GameMaster.Instance.turnState.playerTurn][0].positionInBoard, ref availablePositions, false);
+        ShowAvailableBoardPositions(GameMaster.Instance.playerBuilders[GameMaster.Instance.turnState.playerTurn][1].positionInBoard, ref availablePositions, false);
     }
 }
