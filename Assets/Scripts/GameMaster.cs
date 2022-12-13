@@ -6,6 +6,7 @@ using Cinemachine;
 
 public enum TurnAction
 {
+    WAITING_START,
     MOVE,
     BUILD,
     SELECT_PLAYER_SQUARES,
@@ -33,17 +34,19 @@ public class GameMaster : MonoBehaviour
 {
     public static GameMaster Instance { get; private set; }
 
-    private bool positionsAssigned = false;
-
     public TurnState turnState = new TurnState();
 
     [SerializeField] TMPro.TMP_Text nextTurnText;
+    [SerializeField] TMPro.TMP_Text gameOverText;
     [SerializeField] Image turnImage;
+    [SerializeField] GameObject startGamePanel;
 
     [SerializeField] CinemachineVirtualCamera p1Cam;
     [SerializeField] CinemachineVirtualCamera p2Cam;
+    [SerializeField] CinemachineVirtualCamera isometricCam;
 
     public List<List<Builder>> playerBuilders = new List<List<Builder>>();
+    public List<Color> playerColors = new List<Color>();
 
     const int numPlayers = 2;
 
@@ -72,7 +75,10 @@ public class GameMaster : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        StartNewGame();
+        //StartNewGame();
+        startGamePanel.gameObject.SetActive(true);
+        turnState.action = TurnAction.WAITING_START;
+        isometricCam.Priority = 100;
     }
 
     // Update is called once per frame
@@ -80,17 +86,35 @@ public class GameMaster : MonoBehaviour
     {
     }
 
-    private void StartNewGame()
+    public void StartNewGame()
     {
         BoardManager.Instance.InitializeBoard();
-        positionsAssigned = false;
         turnState.playerTurn = 0;
         turnState.action = TurnAction.SELECT_PLAYER_SQUARES;
+        isometricCam.Priority = -1;
+        startGamePanel.gameObject.SetActive(false);
     }
 
-    private void SelectPositions()
+    private void EndGame()
     {
+        isometricCam.Priority = 100;
+        p1Cam.Priority = 10;
+        p2Cam.Priority = -1;
+        BoardManager.Instance.InitializeBoard();
+        turnState.playerTurn = 0;
+        turnState.action = TurnAction.WAITING_START;
 
+        // Delete players
+        for (int i = 0; i < numPlayers; i++)
+        {
+            foreach (Builder builder in playerBuilders[i])
+            {
+                Destroy(builder.builderGameObject);
+            }
+            playerBuilders[i].Clear();
+        }
+
+        startGamePanel.gameObject.SetActive(true);
     }
 
     public void NextPlayer()
@@ -100,12 +124,32 @@ public class GameMaster : MonoBehaviour
 
         if (turnState.playerTurn == 0)
         {
+            foreach (Builder builder in playerBuilders[0])
+            {
+                builder.builderGameObject.GetComponent<Outline>().enabled = true;
+            }
+
+            foreach (Builder builder in playerBuilders[1])
+            {
+                builder.builderGameObject.GetComponent<Outline>().enabled = false;
+            }
+
             turnImage.color = Color.white;
             p1Cam.Priority = 10;
             p2Cam.Priority = -1;
         }
         else
         {
+            foreach (Builder builder in playerBuilders[0])
+            {
+                builder.builderGameObject.GetComponent<Outline>().enabled = false;
+            }
+
+            foreach (Builder builder in playerBuilders[1])
+            {
+                builder.builderGameObject.GetComponent<Outline>().enabled = true;
+            }
+
             turnImage.color = new Color(0.30f, 0.30f, 0.30f, 1);
             p1Cam.Priority = -1;
             p2Cam.Priority = 10;
@@ -143,10 +187,19 @@ public class GameMaster : MonoBehaviour
         }
     }
 
-    public IEnumerator ShowText()
+    public void WonGame(int player)
     {
-        nextTurnText.gameObject.SetActive(true);
-        yield return new WaitForSeconds(1.25f);
-        nextTurnText.gameObject.SetActive(false);
+        gameOverText.text = "Player " + (player + 1) + " wins!";
+        if (playerColors.Count >= 2) gameOverText.color = playerColors[player];
+        StartCoroutine(ShowText(gameOverText.gameObject, 2f));
+    }
+
+    public IEnumerator ShowText(GameObject textObj, float duration)
+    {
+        
+        textObj.SetActive(true);
+        yield return new WaitForSeconds(duration);
+        textObj.SetActive(false);
+        EndGame();
     }
 }
