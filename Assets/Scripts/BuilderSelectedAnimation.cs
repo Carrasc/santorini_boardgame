@@ -11,7 +11,7 @@ public class BuilderSelectedAnimation : MonoBehaviour
     public void Update()
     {
         float y = Mathf.PingPong(Time.time * speed, 0.1f);
-        transform.position = new Vector3(transform.position.x, y, transform.position.z);
+        transform.position = new Vector3(transform.position.x, startingYPos + y, transform.position.z);
         
     }
 

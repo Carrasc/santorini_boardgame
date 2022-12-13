@@ -158,14 +158,18 @@ public class BoardManager : MonoBehaviour
             {
                 // The player clicked on a builder position to move him, select that builder and show available move positions
                 if (GameMaster.Instance.playerBuilders[playerTurn][i].positionInBoard.x == row && GameMaster.Instance.playerBuilders[playerTurn][i].positionInBoard.y == column && currentSelectedBuilder == null)
-                {
+                {                   
                     SelectBuilder(GameMaster.Instance.playerBuilders[playerTurn][i], square, true);
                     ShowAvailableBoardPositions(new Vector2(row, column), ref availablePositions);
+                    // Play the selected animation
+                    currentSelectedBuilder.builderGameObject.GetComponent<BuilderSelectedAnimation>().enabled = true;
                     break;
                 }
                 // If the clicks the same position, unselect the position
                 else if (GameMaster.Instance.playerBuilders[playerTurn][i].positionInBoard.x == row && GameMaster.Instance.playerBuilders[playerTurn][i].positionInBoard.y == column && currentSelectedPosition == square)
                 {
+                    // Stop the selected animation
+                    currentSelectedBuilder.builderGameObject.GetComponent<BuilderSelectedAnimation>().enabled = false;
                     SelectBuilder(GameMaster.Instance.playerBuilders[playerTurn][i], square, false);
                     HideAvailableBoardPositions(ref availablePositions);
                     break;
@@ -337,6 +341,9 @@ public class BoardManager : MonoBehaviour
                 isWinningMove = true;
                 break;
         }
+
+        // Stop the animation
+        currentSelectedBuilder.builderGameObject.GetComponent<BuilderSelectedAnimation>().enabled = false;
 
         // Move the actual transform
         currentSelectedBuilder.builderGameObject.transform.position = boardState[(int)positionToMove.x][(int)positionToMove.y].squareGameObject.transform.position + new Vector3(0, yOffset, 0);
