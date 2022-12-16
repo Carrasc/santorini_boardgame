@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Cinemachine;
+using mixpanel;
 
 public enum TurnAction
 {
@@ -75,6 +76,17 @@ public class GameMaster : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Mix Panel Identify the user / device when the game runs at the start (https://docs.unity3d.com/ScriptReference/SystemInfo-deviceUniqueIdentifier.html)
+        Mixpanel.Identify(SystemInfo.deviceUniqueIdentifier);
+        //Mixpanel.Identify("OTHER_USER_TO_TEST");
+
+        Debug.Log("My device ID = " + SystemInfo.deviceUniqueIdentifier);
+
+        // Sets user 13793's "Plan" attribute to "Premium"
+        Mixpanel.People.Set("Plan", "Premium");
+        Mixpanel.People.Set("UserType", "Teacher");
+
+
         //StartNewGame();
         startGamePanel.gameObject.SetActive(true);
         turnState.action = TurnAction.WAITING_START;
@@ -93,6 +105,9 @@ public class GameMaster : MonoBehaviour
         turnState.action = TurnAction.SELECT_PLAYER_SQUARES;
         isometricCam.Priority = -1;
         startGamePanel.gameObject.SetActive(false);
+
+        // Track with event-name
+        Mixpanel.Track("New game started");
     }
 
     private void EndGame()
