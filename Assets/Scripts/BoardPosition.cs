@@ -13,6 +13,9 @@ public class BoardPosition : MonoBehaviour
         myColIndex = transform.GetSiblingIndex();
     }
 
+    /// <summary>
+    /// When the user clicks a position on the board
+    /// </summary>
     private void OnMouseUpAsButton()
     {
         //Debug.Log("Clicked : " + gameObject.name);
