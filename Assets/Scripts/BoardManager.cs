@@ -11,6 +11,9 @@ public enum PositionState
     BLOCKED = -1
 }
 
+/// <summary>
+/// Comment class to test branches 
+/// </summary>
 public class BoardSquare
 {
     public PositionState state;
